@@ -1,0 +1,41 @@
+from Bio.Seq import Seq
+
+__author__ = 'ashjay26'
+
+from Bio import Entrez, SeqIO, Motif, Seq
+from random import randrange
+
+from Bio.Alphabet import IUPAC
+
+m = Motif.Motif(alphabet=IUPAC.ambiguous_dna)
+
+m.add_instance(Seq("CAYRTGN", IUPAC.ambiguous_dna))
+m.add_instance(Seq("TCAYRTG", IUPAC.ambiguous_dna))
+m.add_instance(Seq("CAYRTGA", IUPAC.ambiguous_dna))
+
+chr_lengths = [247249719, 242951149,199501827,191273063,180857866,170899992,158821424,146274826,140273252,135374737,134452384,132349534,114142980,106368585,100338915,88827254,78774742,76117153,63811651,62435964,46944323,49691432,154913754,57772954]
+
+
+final = open("random_motif_search.xls", 'w')
+Entrez.email = "xyz.edu"
+
+b=0
+for t in range(1,10):
+
+    for i in range(0,1000):
+
+        rand_stop = randrange(1,chr_lengths[t])
+
+        rand_start = rand_stop - 1000
+
+        handle = Entrez.efetch(db = "nucleotide", id="NC_00000%d" %t, rettype = "fasta", strand=1, seq_start = rand_start, seq_stop=rand_stop)
+        record = SeqIO.read(handle,"fasta")
+        if (m.search_instances(record.seq) is True) or (m.search_instances(record.complement.seq) is True):
+            b +=1
+
+   
+        handle.close()
+
+    final.write("chr%d"%t + '\t' + str(b) + '\n')    #string_seq = (record.seq)
+
+final.close()
